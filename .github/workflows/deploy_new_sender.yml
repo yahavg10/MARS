@@ -22,16 +22,17 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             if [ ! -d "$HOME/MARS" ]; then
-              echo "Project CloudyServer doesn't exist, cloning Project"
+              echo "Project MARS doesn't exist, cloning Project"
               git clone https://yahavg10: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@github.com/yahavg10/MARS.git
-              cd CloudyDay
+              cd MARS
               source myenv/bin/activate
+              export CONFIG_FILE_PATH=configurations/configuration.yml
               echo "installing python3-pip, python3"
               sudo apt update
               sudo apt install python3-pip
               sudo apt install python3
               echo "installing dependencies from requirements.txt"
-              pip install -r configurations/requirements.txt
+              pip install -r deployment/requirements.txt
               sudo cp configurations/deploy.service /etc/systemd/system/
               echo "reload system configurations"
               sudo systemctl daemon-reload
