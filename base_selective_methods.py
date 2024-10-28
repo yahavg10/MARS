@@ -3,8 +3,8 @@ from typing import NoReturn
 
 import redis
 
-from handling.handler import Handler
-from processoring import toolbox
+from PipelineExecutor import toolbox
+from orchestrator.orchestrator import Orchestrator
 
 ###################################################################################################
 ###################################################################################################
@@ -24,9 +24,9 @@ database_class = redis.Redis
 ###################################################################################################
 ###################################################################################################
 
-process_handler_function = lambda self, proc_handler, kwargs: \
+pipeline_fn = lambda self, proc_orchestrator, kwargs: \
     self.toolbox["process_by_existence"](
-        proc_handler,
+        proc_orchestrator,
         self.toolbox["get_common_name"](self.toolbox["get_file_name"](kwargs["kwargs"]["src_path"])),
         self.toolbox["determine_part"](self.toolbox["get_file_name"](kwargs["kwargs"]["src_path"]))
     )
@@ -47,6 +47,6 @@ file_sender_function = lambda folder_path, common_name, suffixes, file_read_mode
 #                                    TOOLBOX INITIAL SETUP                                        #
 ###################################################################################################
 ###################################################################################################
-def setup_toolbox(handler: Handler) -> NoReturn:
+def setup_toolbox(orchestrator: Orchestrator) -> NoReturn:
     for name, func in inspect.getmembers(toolbox, inspect.isfunction):
-        handler.processor.toolbox.setdefault(name, func)
+        orchestrator.pipeline_executor.toolbox.setdefault(name, func)

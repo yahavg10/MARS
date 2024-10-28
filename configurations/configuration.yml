@@ -7,8 +7,8 @@ components:
   sender:
     api_url: "http://4.210.254.55:8000/merge-files/"
 
-  processor:
-    folder_path: "tmp_files"
+  pipeline_executor:
+    folder_path: "utils"
     expiry_delay: 60
     max_workers: 500
     handling_way: "multithread"

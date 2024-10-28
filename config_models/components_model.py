@@ -6,4 +6,4 @@ from typing import Any, Dict
 class Components:
     database: Dict[str, Any]
     sender: Dict[str, Any]
-    processor: Dict[str, Any]
+    pipeline_executor: Dict[str, Any]

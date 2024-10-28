@@ -4,3 +4,6 @@
 2024-10-27 11:23:51 - CRITICAL - This is a critical message
 2024-10-27 11:24:57 - ERROR - This is an error message
 2024-10-27 11:24:57 - CRITICAL - This is a critical message
+2024-10-28 17:39:27 - ERROR - [WinError 3] The system cannot find the path specified.
+2024-10-28 17:42:11 - ERROR - [WinError 2] The system cannot find the file specified.
+2024-10-28 17:57:27 - ERROR - Error cleaning up files: 'Orchestrator' object has no attribute 'db_strategy'

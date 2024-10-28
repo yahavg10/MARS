@@ -27,7 +27,7 @@ def create_handler(handler_name: str, **kwargs) -> logging.Handler:
 
     handler_class = handler_mapping.get(handler_name)
     if handler_class:
-        if handler_name == "StreamHandler":
+        if handler_name == "StreamOrchestrator":
             kwargs.pop("filename", None)
             return handler_class(**kwargs)
         else:

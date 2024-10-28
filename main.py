@@ -2,17 +2,16 @@ from typing import NoReturn
 
 import yaml
 
-from base_selective_methods import setup_toolbox, file_sender_function, process_handler_function, \
-    database_delete_function, database_fetch_function, database_store_function, database_class
+from base_selective_methods import setup_toolbox, file_sender_function, \
+    database_delete_function, database_fetch_function, database_store_function, database_class, pipeline_fn
 from config_models.app_model import AppConfig
-from handling.handler_builder import HandlerBuilder
-from processoring.toolbox import scan_existing_files
+from orchestrator.orchestrator_builder import OrchestratorBuilder
 from utils.logger_utils import setup_custom_logger
 from utils.observe import create_observer, start_observer
 
 
-def configure_handler_builder() -> NoReturn:
-    builder = HandlerBuilder()
+def configure_orchestrator_builder() -> NoReturn:
+    builder = OrchestratorBuilder()
     return (
         builder
             .with_configuration(AppConfig, yaml.safe_load)
@@ -23,21 +22,21 @@ def configure_handler_builder() -> NoReturn:
             delete_fn=database_delete_function,
         )
             .with_sender(file_sender_function)
-            .with_processor(process_handler_function)
+            .with_pipeline_executor(pipeline_fn)
             .build()
     )
 
 
 def main() -> NoReturn:
-    handler = configure_handler_builder()
-    setup_toolbox(handler)
+    orchestrator = configure_orchestrator_builder()
+    setup_toolbox(orchestrator)
 
-    setup_custom_logger(handler.configuration.logger)
+    setup_custom_logger(orchestrator.configuration.logger)
 
-    observer = create_observer(handler=handler,
-                               folder_to_monitor=handler.configuration.components.processor["folder_path"])
+    observer = create_observer(orchestrator=orchestrator,
+                               folder_to_monitor=orchestrator.configuration.components.pipeline_executor["folder_path"])
     start_observer(observer)
-    # scan_existing_files(handler)
+    # scan_existing_files(orchestrator)
 
 
 if __name__ == "__main__":

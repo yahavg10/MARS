@@ -7,9 +7,9 @@ from watchdog.observers.api import BaseObserver
 logger = logging.getLogger(name="finals_logger")
 
 
-def create_observer(handler, folder_to_monitor: str) -> BaseObserver:
+def create_observer(orchestrator, folder_to_monitor: str) -> BaseObserver:
     observer = Observer()
-    observer.schedule(handler, folder_to_monitor, recursive=False)
+    observer.schedule(orchestrator, folder_to_monitor, recursive=False)
     return observer if isinstance(folder_to_monitor, str) else TypeError
 
 
