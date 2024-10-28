@@ -1,0 +1,35 @@
+name: Update-Yahav-Cloudy-Sender
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy-existing-machines:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        host: [ "20.54.253.55" ]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Deploy project on Existing VM
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ matrix.host }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            echo "pulling from branch main"
+            cd $HOME/MARS
+            git pull origin main
+            source myenv/bin/activate
+            echo "installing dependencies from requirements.txt"
+            pip install -r configurations/requirements.txt
+            echo "coping service config"
+            sudo cp configurations/deploy.service /etc/systemd/system/
+            echo "reload system configurations"
+            sudo systemctl daemon-reload
+            echo "run service"
+            sudo systemctl restart deploy.service
