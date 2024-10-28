@@ -24,11 +24,12 @@ jobs:
             echo "pulling from branch main"
             cd $HOME/MARS
             git pull origin main
+            export CONFIG_FILE_PATH=configurations/configuration.yml
             source myenv/bin/activate
             echo "installing dependencies from requirements.txt"
-            pip install -r configurations/requirements.txt
+            pip install -r deployment/requirements.txt
             echo "coping service config"
-            sudo cp configurations/deploy.service /etc/systemd/system/
+            sudo cp deployment/deploy.service /etc/systemd/system/
             echo "reload system configurations"
             sudo systemctl daemon-reload
             echo "run service"
