@@ -1,0 +1,28 @@
+components:
+  database:
+    host: '20.54.253.55'
+    port: 6379
+    db: 0
+
+  sender:
+    api_url: "http://4.210.254.55:8000/merge-files/"
+
+  processor:
+    folder_path: "tmp_files"
+    expiry_delay: 60
+    max_workers: 500
+    handling_way: "multithread"
+
+logger:
+  logger_name: "finals_logger"
+  fmt: "%(asctime)s - %(levelname)s - %(message)s"
+  datefmt: "%Y-%m-%d %H:%M:%S"
+  handlers:
+    - type: "FileHandler"
+      file_path: "logs/log.log"
+      level: INFO
+    - type: "FileHandler"
+      file_path: "logs/error.log"
+      level: ERROR
+    - type: "StreamHandler"
+      level: DEBUG

@@ -1,0 +1,13 @@
+[Unit]
+Description=Cloudy Server Service
+After=network.target
+
+[Service]
+Type=simple
+User=yahav
+WorkingDirectory=/home/yahav/marsV2
+ExecStart=/bin/bash -c 'source /home/yahav/marsV2/myenv/bin/activate && python3 /home/yahav/marsV2/main.py'
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
