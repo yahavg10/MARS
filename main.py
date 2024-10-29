@@ -2,6 +2,7 @@ from typing import NoReturn
 
 import yaml
 
+from PipelineExecutor.toolbox import scan_existing_files
 from base_selective_methods import setup_toolbox, file_sender_function, \
     database_delete_function, database_fetch_function, database_store_function, database_class, pipeline_fn
 from config_models.app_model import AppConfig
@@ -35,8 +36,9 @@ def main() -> NoReturn:
 
     observer = create_observer(orchestrator=orchestrator,
                                folder_to_monitor=orchestrator.configuration.components.pipeline_executor["folder_path"])
+    
+    scan_existing_files(orchestrator)
     start_observer(observer)
-    # scan_existing_files(orchestrator)
 
 
 if __name__ == "__main__":

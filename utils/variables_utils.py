@@ -4,4 +4,4 @@ ObjectConfiguration = Dict[str, Any]
 
 file_read_mode = "rb"
 
-suffixes = ["_a.txt", "_b.txt"]
+suffixes = ["_a.jpg", "_b"]

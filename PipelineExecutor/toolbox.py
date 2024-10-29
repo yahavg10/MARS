@@ -2,10 +2,9 @@ import logging
 import os
 from pathlib import Path
 from threading import Timer
+from time import sleep
 from typing import List
 from typing import NoReturn
-
-from watchdog.events import FileCreatedEvent
 
 from orchestrator.orchestrator import Orchestrator
 from utils.variables_utils import suffixes
@@ -36,10 +35,10 @@ def delete_files_from_os(common_name: str, delete_all_occurrences: bool, orchest
         os.path.exists(file_path + suffix) and os.remove(file_path + suffix)
 
 
-def schedule_file_removal(pipeline_executor, common_name: str, suffix: str,
+def schedule_file_removal(orchestrator: Orchestrator, common_name: str, suffix: str,
                           delay: int = 30) -> NoReturn:
     logger.info(f"Scheduling removal of {common_name + suffix} in {delay} seconds if no match found.")
-    Timer(delay, cleanup_files, args=[pipeline_executor, common_name, suffix, False]).start()
+    Timer(delay, cleanup_files, args=[orchestrator, common_name, suffix, False]).start()
 
 
 def determine_part(file_name: str) -> str:
@@ -52,15 +51,13 @@ def get_file_paths(folder_path: str) -> List[str]:
 
 
 def get_file_name(event) -> str:
-    return os.path.basename(event.src_path) \
-        if isinstance(event, FileCreatedEvent) \
-        else os.path.basename(event.replace('\\', '/'))
+    return os.path.basename(event.replace('\\', '/'))
 
 
 def get_common_name(file_name: str) -> str:
     common_name = file_name.replace(next((suffix for suffix in suffixes if suffix in file_name), ""), "") \
         .replace(".jpg", "") \
-        .replace(".txt", "")
+        # .replace(".txt", "")
     return common_name
 
 
@@ -81,7 +78,7 @@ store = lambda orchestrator, common_name, suffix: (
 )
 
 
-def scan_existing_files(orchestrator) -> NoReturn:
+def scan_existing_files(orchestrator: Orchestrator) -> NoReturn:
     folder_path = orchestrator.configuration.components.pipeline_executor["folder_path"]
 
     def is_valid_file(file_name: str) -> bool:
@@ -95,15 +92,17 @@ def scan_existing_files(orchestrator) -> NoReturn:
     valid_files = filter(is_valid_file, os.listdir(folder_path))
 
     for valid_file in valid_files:
-        file_path = os.path.join(folder_path, valid_file)
+        file_path = os.path.join(folder_path, valid_file).replace("\\", "/")
         logger.info(f"Processing file: {file_path}")
+        sleep(0.5)  # redis doesn't update fast enough
         orchestrator.pipeline_executor.strategy_pool.pool.submit(orchestrator.pipeline_executor.process,
                                                                  kwargs={'event_type': None, 'src_path': file_path})
 
 
 def process_by_existence(orchestrator: Orchestrator, common_name: str, suffix: str) -> NoReturn:
+    # print(orchestrator.database.db_instance.get(common_name))
     exists_in_db = orchestrator.database.db_instance.get(common_name)
-    if exists_in_db:
+    if exists_in_db is not None:
         fetch(orchestrator, common_name, suffix)
     else:
         store(orchestrator, common_name, suffix)

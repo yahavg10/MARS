@@ -8,7 +8,7 @@ components:
     api_url: "http://4.210.254.55:8000/merge-files/"
 
   pipeline_executor:
-    folder_path: "utils"
+    folder_path: "C:/Users/nadav/Desktop/all_images"
     expiry_delay: 60
     max_workers: 500
     handling_way: "multithread"
