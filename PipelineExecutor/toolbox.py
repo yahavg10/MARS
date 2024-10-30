@@ -12,33 +12,31 @@ from utils.variables_utils import suffixes
 logger = logging.getLogger(name="finals_logger")
 
 
-def cleanup_files(orchestrator: Orchestrator, common_name: str, suffix: str,
-                  delete_all_occurrences: bool) -> NoReturn:
-    delete_files_from_os(common_name, delete_all_occurrences, orchestrator, suffix)
-    delete_files_from_db(common_name, orchestrator, suffix)
-
-
-def delete_files_from_db(common_name: str, orchestrator: Orchestrator, suffix: str) -> NoReturn:
+def delete_from_db(common_name: str, orchestrator: Orchestrator, suffix: str) -> NoReturn:
     try:
-        orchestrator.database.fetch(key=common_name) and orchestrator.database.delete(key=common_name)
+        orchestrator.database.db_instance.get(common_name) and orchestrator.database.delete(key=common_name)
         logger.info(f"Cleaned up {common_name + suffix}")
     except Exception as e:
         logger.error(f"Error cleaning up files: {str(e)}")
 
 
-def delete_files_from_os(common_name: str, delete_all_occurrences: bool, orchestrator: Orchestrator,
-                         suffix: str) -> NoReturn:
-    file_path = orchestrator.configuration.components.pipeline_executor["folder_path"] + common_name
-    if delete_all_occurrences:
-        [os.remove(file_path + suffix) for suffix in suffixes if os.path.exists(file_path + suffix)]
-    else:
-        os.path.exists(file_path + suffix) and os.remove(file_path + suffix)
+def delete_single_file(orchestrator: Orchestrator, common_name: str,
+                       suffix: str) -> NoReturn:
+    file_path = orchestrator.configuration.components.pipeline_executor["folder_path"] + "/" + common_name
+    os.path.exists(file_path + suffix) and os.remove(file_path + suffix)
+    delete_from_db(common_name, orchestrator, suffix)
+
+
+def delete_all_files(common_name: str, orchestrator: Orchestrator) -> NoReturn:
+    file_path = orchestrator.configuration.components.pipeline_executor["folder_path"] + "/" + common_name
+    [os.remove(file_path + suffix) and delete_from_db(common_name, orchestrator, suffix) for suffix in suffixes if
+     os.path.exists(file_path + suffix)]
 
 
 def schedule_file_removal(orchestrator: Orchestrator, common_name: str, suffix: str,
                           delay: int = 30) -> NoReturn:
     logger.info(f"Scheduling removal of {common_name + suffix} in {delay} seconds if no match found.")
-    Timer(delay, cleanup_files, args=[orchestrator, common_name, suffix, False]).start()
+    Timer(delay, delete_single_file, args=[orchestrator, common_name, suffix]).start()
 
 
 def determine_part(file_name: str) -> str:
@@ -56,8 +54,7 @@ def get_file_name(event) -> str:
 
 def get_common_name(file_name: str) -> str:
     common_name = file_name.replace(next((suffix for suffix in suffixes if suffix in file_name), ""), "") \
-        .replace(".jpg", "") \
-        # .replace(".txt", "")
+        .replace(".jpg", "")
     return common_name
 
 
@@ -65,7 +62,7 @@ fetch = lambda orchestrator, common_name, suffix: (
     orchestrator.sender.send_request(orchestrator.configuration.components.sender["api_url"],
                                      orchestrator.configuration.components.pipeline_executor["folder_path"],
                                      common_name),
-    cleanup_files(orchestrator.pipeline_executor, common_name, suffix, True)
+    delete_all_files(common_name, orchestrator)
 )
 
 store = lambda orchestrator, common_name, suffix: (

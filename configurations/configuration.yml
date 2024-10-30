@@ -5,7 +5,7 @@ components:
     db: 0
 
   sender:
-    api_url: "http://4.210.254.55:8000/merge-files/"
+    api_url: "http://172.17.64.1:8000/merge-files/"
 
   pipeline_executor:
     folder_path: "C:/Users/nadav/Desktop/all_images"

@@ -36,7 +36,7 @@ def main() -> NoReturn:
 
     observer = create_observer(orchestrator=orchestrator,
                                folder_to_monitor=orchestrator.configuration.components.pipeline_executor["folder_path"])
-    
+
     scan_existing_files(orchestrator)
     start_observer(observer)
 
