@@ -5,10 +5,10 @@ components:
     db: 0
 
   sender:
-    api_url: "http://172.17.64.1:8000/merge-files/"
+    api_url: "http://4.180.218.18:8000/merge-files/"
 
   pipeline_executor:
-    folder_path: "C:/Users/nadav/Desktop/all_images"
+    folder_path: "/home/yahav/images"
     expiry_delay: 60
     max_workers: 500
     handling_way: "multithread"
